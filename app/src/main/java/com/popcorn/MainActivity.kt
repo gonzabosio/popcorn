@@ -1,6 +1,5 @@
 package com.popcorn
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,7 +12,6 @@ import com.popcorn.ui.theme.PopcornTheme
 class MainActivity : ComponentActivity() {
 
     private val vm by viewModels<MoviesViewModel>()
-    @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
