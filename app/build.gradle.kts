@@ -69,7 +69,24 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+
+    //API
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    //Images
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    val voyagerVersion = "1.0.0"
+    // Navigator
+    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+
+    //UI(TabRow)
+    implementation("androidx.compose.material3:material3:1.3.0-beta01")
+    //StatusBar
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.0")
+    //Splash Screen
+    implementation ("androidx.core:core-splashscreen:1.0.1")
 }

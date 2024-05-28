@@ -19,7 +19,9 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Popcorn">
+            android:theme="@style/Theme.Popcorn"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
