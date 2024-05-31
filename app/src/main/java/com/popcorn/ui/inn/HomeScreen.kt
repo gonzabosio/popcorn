@@ -25,7 +25,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -35,7 +34,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,37 +41,38 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import coil.compose.AsyncImage
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 import com.popcorn.R
 import com.popcorn.api.Fetch
 import com.popcorn.api.MovieItem
 import com.popcorn.MoviesViewModel
 import com.popcorn.ui.SearchBarFun
+import com.popcorn.ui.auth.RegisterScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeScreen(
-    private val sharedVM: MoviesViewModel
+class HomeScreen @Inject constructor(
+    private val sharedVM: MoviesViewModel,
+    private val registerScreen: RegisterScreen,
 ): Screen {
     @Composable
     override fun Content() {
+        val user = Firebase.auth.currentUser
+
+        Log.d("firebase_tag","${user?.email}")
         val modifier: Modifier = Modifier
         val tab by sharedVM.tab.collectAsState()
         val context = LocalContext.current
         val activity = context as? Activity
-        val systemUiController = rememberSystemUiController()
-        SideEffect {
-            systemUiController.setSystemBarsColor(
-                color = Color.Transparent,
-                darkIcons = false
-            )
-        }
         BackHandler {
             activity?.finish()
         }
         var searchDisplay by remember { mutableStateOf("") }
-        val search = SearchBarFun(sharedVM)
+        val search = SearchBarFun(registerScreen, sharedVM)
         Scaffold(
             containerColor = colorResource(id = R.color.section),
             contentColor = colorResource(id = R.color.letter),
@@ -244,6 +243,8 @@ fun TextTabs(tab: Int, sharedVM: MoviesViewModel) {
 fun ClickOnMovie(movie: MovieItem, index: Int, sharedVM: MoviesViewModel, onClick : (Int) -> Unit) {
     val imgUrl = "https://image.tmdb.org/t/p/original"
     val nav = LocalNavigator.current
+    val db = Firebase.firestore
+    val user = Firebase.auth.currentUser
     Column(
         Modifier
             .clickable {

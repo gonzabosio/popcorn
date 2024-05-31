@@ -1,7 +1,12 @@
+import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.isKaptVerbose
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id ("com.google.gms.google-services")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -79,14 +84,24 @@ dependencies {
     //Images
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    val voyagerVersion = "1.0.0"
     // Navigator
-    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-navigator:1.0.0")
 
     //UI(TabRow)
     implementation("androidx.compose.material3:material3:1.3.0-beta01")
-    //StatusBar
-    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.0")
     //Splash Screen
     implementation ("androidx.core:core-splashscreen:1.0.1")
+
+    //Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+
+    //Hilt
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt ("com.google.dagger:hilt-compiler:2.51.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+}
+kapt {
+    correctErrorTypes = true
 }

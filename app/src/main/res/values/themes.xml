@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.Popcorn" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.Popcorn.Start" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/bgDM</item>
+        <item name="postSplashScreenTheme">@style/Theme.Popcorn</item>
+        <item name="android:icon">@drawable/popcorn</item>
+    </style>
 </resources>

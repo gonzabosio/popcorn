@@ -45,12 +45,10 @@ import com.popcorn.MoviesViewModel
 import com.popcorn.R
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.runtime.SideEffect
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.foundation.layout.systemBars
 
 class DescriptionScreen(
-    private val sharedVM: MoviesViewModel
+    private val sharedVM: MoviesViewModel,
 ) : Screen {
     @Composable
     override fun Content() {
@@ -62,20 +60,13 @@ class DescriptionScreen(
         val imgUrl = "https://image.tmdb.org/t/p/original"
         val modifier: Modifier = Modifier
         var isFavorite by remember { mutableStateOf(false) }
-        val systemUiController = rememberSystemUiController()
-        SideEffect {
-            systemUiController.setSystemBarsColor(
-                color = Color.Transparent,
-                darkIcons = false
-            )
-        }
         Surface(
             color = colorResource(id = R.color.bgDM),
             modifier = modifier
                 .fillMaxSize()
         ) {
             Box(
-                modifier.padding(WindowInsets.statusBars.asPaddingValues())
+                modifier.padding(WindowInsets.systemBars.asPaddingValues())
             ) {
                 AsyncImage(model = imgUrl + movie.backdropPath, contentDescription = null, modifier.fillMaxWidth())
                 Column(
@@ -101,7 +92,6 @@ class DescriptionScreen(
                         IconButton(
                             onClick = {
                                 isFavorite = !isFavorite
-                                //Add to favorite
                             },
                             modifier = Modifier
                                 .padding(8.dp)
@@ -112,7 +102,7 @@ class DescriptionScreen(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.fillMaxHeight(0.21f))
+                    Spacer(modifier = Modifier.fillMaxHeight(0.18f))
                     Box(
                         modifier.padding(4.dp)
                     ) {

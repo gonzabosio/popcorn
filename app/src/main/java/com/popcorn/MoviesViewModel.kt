@@ -3,23 +3,17 @@ package com.popcorn
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.popcorn.api.Fetch
 import com.popcorn.api.MovieDetails
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import java.util.regex.Pattern
+import javax.inject.Inject
 
-class MoviesViewModel: ViewModel() {
-    private val _logged = MutableStateFlow(false)
-    val logged: StateFlow<Boolean> = _logged
-    init {
-        viewModelScope.launch {
-            _logged.value = true
-        }
-    }
+@HiltViewModel
+class MoviesViewModel @Inject constructor() : ViewModel() {
 
     private val _tab = MutableStateFlow(0)
     val tab: StateFlow<Int> = _tab
@@ -27,7 +21,7 @@ class MoviesViewModel: ViewModel() {
         _tab.value = tab
     }
 
-    val fetch = Fetch()
+    private val fetch = Fetch()
     private val _movieDetails = MutableStateFlow(MovieDetails())
     val movieDetails: StateFlow<MovieDetails> = _movieDetails.asStateFlow()
     suspend fun loadMovie(movieId: Int) {
@@ -36,8 +30,6 @@ class MoviesViewModel: ViewModel() {
 
     private val _emailError = MutableStateFlow("")
     val emailError: StateFlow<String> = _emailError
-    private val _usernameError = MutableStateFlow("")
-    val usernameError: StateFlow<String> = _usernameError
     private val _passwordError = MutableStateFlow("")
     val passwordError: StateFlow<String> = _passwordError
 
@@ -61,11 +53,6 @@ class MoviesViewModel: ViewModel() {
         }
         return validEmail.value
     }
-    fun isValidUsername(username: String) {
-        //if already in use {
-        // _usernameError.value = "Username already in use"
-        // }
-    }
     fun isValidPassword(password: String): Boolean {
         _passwordError.value = when{
             !numberRegex.matcher(password).find() -> "Password must contain at least one number"
@@ -77,6 +64,4 @@ class MoviesViewModel: ViewModel() {
         }
         return validPw.value
     }
-    fun register() {}
-    fun login() {}
 }

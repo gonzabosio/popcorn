@@ -19,7 +19,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -28,38 +27,36 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import coil.compose.AsyncImage
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 import com.popcorn.MoviesViewModel
 import com.popcorn.R
 import com.popcorn.api.Fetch
 import com.popcorn.api.MovieItem
 import com.popcorn.ui.SearchBarFun
+import com.popcorn.ui.auth.RegisterScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class QueryScreen(
+class QueryScreen @Inject constructor(
     private val sharedVM: MoviesViewModel,
+    private val registerScreen: RegisterScreen,
     private val movie: String
 ): Screen {
     @Composable
     override fun Content() {
         val modifier: Modifier = Modifier
-        val systemUiController = rememberSystemUiController()
-        SideEffect {
-            systemUiController.setSystemBarsColor(
-                color = Color.Transparent,
-                darkIcons = false
-            )
-        }
         var searchDisplay by remember { mutableStateOf("") }
-        val search = SearchBarFun(sharedVM)
+        val search = SearchBarFun(registerScreen, sharedVM)
         Scaffold(
             containerColor = colorResource(id = R.color.section),
             contentColor = colorResource(id = R.color.letter),

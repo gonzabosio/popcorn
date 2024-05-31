@@ -43,10 +43,13 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import com.popcorn.MoviesViewModel
 import com.popcorn.R
+import com.popcorn.ui.auth.RegisterScreen
 import com.popcorn.ui.inn.ProfileScreen
 import com.popcorn.ui.inn.QueryScreen
+import javax.inject.Inject
 
-class SearchBarFun(
+class SearchBarFun @Inject constructor(
+    private val registerScreen: RegisterScreen,
     private val sharedVM: MoviesViewModel
 ) {
     @Composable
@@ -110,7 +113,7 @@ class SearchBarFun(
                     SearchIcon(iconTint = tint)
                 }
                 IconButton(
-                    onClick = { nav?.push(ProfileScreen(sharedVM)) },
+                    onClick = { nav?.push(ProfileScreen(registerScreen)) },
                     modifier = modifier
                 ) {
                     Icon(imageVector = Icons.Default.Person, contentDescription = null, modifier.size(30.dp))
@@ -178,7 +181,7 @@ class SearchBarFun(
                 keyboardActions = KeyboardActions(
                     onDone = {
                         focusManager.clearFocus()
-                        nav?.push(QueryScreen(sharedVM, searchDisplay))
+                        nav?.push(QueryScreen(sharedVM, registerScreen, searchDisplay))
                     }
                 ),
             )
