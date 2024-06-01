@@ -34,7 +34,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import coil.compose.AsyncImage
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.firestore
 import com.popcorn.MoviesViewModel
 import com.popcorn.R
 import com.popcorn.api.Fetch
@@ -131,12 +130,14 @@ fun MovieList(sharedVM: MoviesViewModel, movie: String) {
 fun ClickOnSearchedMovie(movie: MovieItem, sharedVM: MoviesViewModel) {
     val imgUrl = "https://image.tmdb.org/t/p/original"
     val nav = LocalNavigator.current
+    val user = Firebase.auth.currentUser
     Column(
         Modifier
             .clickable {
                 CoroutineScope(Dispatchers.Main).launch {
+                    val itsInFavorite = checkFavoriteMovie(user?.email.toString(), movie.id.toString())
                     sharedVM.loadMovie(movie.id)
-                    nav?.push(DescriptionScreen(sharedVM))
+                    nav?.push(DescriptionScreen(sharedVM, itsInFavorite))
                 }
             }
             .padding(8.dp)

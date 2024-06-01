@@ -31,7 +31,6 @@ class AuthProcess @Inject constructor(
                         }
                 } else {
                     onComplete(false, task.exception?.message)
-                    Log.d("firebase_tag", "createUserWithEmail:failure", task.exception)
                     Toast.makeText(
                         context,
                         "${task.exception?.message}",

@@ -52,7 +52,10 @@ import com.popcorn.ui.SearchBarFun
 import com.popcorn.ui.auth.RegisterScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class HomeScreen @Inject constructor(
@@ -61,9 +64,6 @@ class HomeScreen @Inject constructor(
 ): Screen {
     @Composable
     override fun Content() {
-        val user = Firebase.auth.currentUser
-
-        Log.d("firebase_tag","${user?.email}")
         val modifier: Modifier = Modifier
         val tab by sharedVM.tab.collectAsState()
         val context = LocalContext.current
@@ -143,7 +143,7 @@ fun TextTabs(tab: Int, sharedVM: MoviesViewModel) {
                 columns = GridCells.Adaptive(120.dp),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 8.dp),
+                    .padding(8.dp),
                 state = gridState,
                 content = {
                     itemsIndexed(movies) {index, movie ->
@@ -177,7 +177,7 @@ fun TextTabs(tab: Int, sharedVM: MoviesViewModel) {
                 columns = GridCells.Adaptive(120.dp),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 8.dp),
+                    .padding(8.dp),
                 state = gridState,
                 content = {
                     itemsIndexed(movies) {index, movie ->
@@ -211,7 +211,7 @@ fun TextTabs(tab: Int, sharedVM: MoviesViewModel) {
                 columns = GridCells.Adaptive(120.dp),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 8.dp),
+                    .padding(8.dp),
                 state = gridState,
                 content = {
                     itemsIndexed(movies) {index, movie ->
@@ -243,15 +243,15 @@ fun TextTabs(tab: Int, sharedVM: MoviesViewModel) {
 fun ClickOnMovie(movie: MovieItem, index: Int, sharedVM: MoviesViewModel, onClick : (Int) -> Unit) {
     val imgUrl = "https://image.tmdb.org/t/p/original"
     val nav = LocalNavigator.current
-    val db = Firebase.firestore
     val user = Firebase.auth.currentUser
     Column(
         Modifier
             .clickable {
                 onClick(index)
                 CoroutineScope(Dispatchers.Main).launch {
+                    val itsInFavorite = checkFavoriteMovie(user?.email.toString(),movie.id.toString())
                     sharedVM.loadMovie(movie.id)
-                    nav?.push(DescriptionScreen(sharedVM))
+                    nav?.push(DescriptionScreen(sharedVM, itsInFavorite))
                 }
             }
             .padding(8.dp)
@@ -268,5 +268,18 @@ fun ClickOnMovie(movie: MovieItem, index: Int, sharedVM: MoviesViewModel, onClic
                 .padding(top = 4.dp)
                 .width(120.dp)
         )
+    }
+}
+suspend fun checkFavoriteMovie(userEmail: String, movieId: String): Boolean {
+    val db = Firebase.firestore
+    return withContext(Dispatchers.IO) {
+        val documents = db.collection("users").document(userEmail)
+            .collection("favorites").get().await()
+        for (document in documents) {
+            if (document.id == movieId) {
+                return@withContext true
+            }
+        }
+        return@withContext false
     }
 }

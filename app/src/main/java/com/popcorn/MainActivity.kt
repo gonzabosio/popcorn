@@ -30,11 +30,9 @@ class MainActivity : ComponentActivity() {
             PopcornTheme(darkTheme = true) {
                 val currentUser = auth.currentUser
                 if (currentUser != null) {
-                    Log.d("firebase_tag","User is logged in")
                     Navigator(HomeScreen(vm, registerScreen))
                 }
                 else {
-                    Log.d("firebase_tag","User is NOT logged in")
                     Navigator(registerScreen)
                 }
             }

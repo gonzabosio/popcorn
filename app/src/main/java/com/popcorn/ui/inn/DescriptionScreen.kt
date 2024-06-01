@@ -46,9 +46,13 @@ import com.popcorn.R
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.systemBars
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 
 class DescriptionScreen(
     private val sharedVM: MoviesViewModel,
+    private val itsInFavorite: Boolean
 ) : Screen {
     @Composable
     override fun Content() {
@@ -59,7 +63,7 @@ class DescriptionScreen(
         val movie by sharedVM.movieDetails.collectAsState()
         val imgUrl = "https://image.tmdb.org/t/p/original"
         val modifier: Modifier = Modifier
-        var isFavorite by remember { mutableStateOf(false) }
+        var isFavorite by remember { mutableStateOf(itsInFavorite) }
         Surface(
             color = colorResource(id = R.color.bgDM),
             modifier = modifier
@@ -92,6 +96,20 @@ class DescriptionScreen(
                         IconButton(
                             onClick = {
                                 isFavorite = !isFavorite
+                                val db = Firebase.firestore
+                                val user = Firebase.auth.currentUser
+                                val movieData = hashMapOf(
+                                    "title" to movie.title,
+                                    "poster" to movie.posterPath
+                                )
+                                if (isFavorite) {
+                                    db.collection("users").document(user?.email.toString()).collection("favorites")
+                                        .document(movie.id.toString()).set(movieData)
+                                }
+                                else {
+                                    db.collection("users").document(user?.email.toString()).collection("favorites")
+                                        .document(movie.id.toString()).delete()
+                                }
                             },
                             modifier = Modifier
                                 .padding(8.dp)

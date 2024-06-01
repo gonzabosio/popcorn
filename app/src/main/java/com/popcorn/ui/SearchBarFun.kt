@@ -110,7 +110,12 @@ class SearchBarFun @Inject constructor(
                     onClick = { onExpandedChanged(true) },
                     modifier = modifier
                 ) {
-                    SearchIcon(iconTint = tint)
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = tint,
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
                 IconButton(
                     onClick = { nav?.push(ProfileScreen(registerScreen)) },
@@ -167,7 +172,9 @@ class SearchBarFun @Inject constructor(
                     onSearchDisplayChanged(it.text)
                 },
                 trailingIcon = {
-                    SearchIcon(iconTint = tint)
+                    SearchIcon(iconTint = tint) {
+                        nav?.push(QueryScreen(sharedVM, registerScreen, searchDisplay))
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,16 +191,19 @@ class SearchBarFun @Inject constructor(
                         nav?.push(QueryScreen(sharedVM, registerScreen, searchDisplay))
                     }
                 ),
+                singleLine = true
             )
         }
     }
     @Composable
-    fun SearchIcon(iconTint: Color) {
-        Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = "search icon",
-            tint = iconTint,
-            modifier = Modifier.size(28.dp)
-        )
+    fun SearchIcon(iconTint: Color, click: ()-> Unit) {
+        IconButton(onClick = { click() }) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(28.dp)
+            )
+        }
     }
 }

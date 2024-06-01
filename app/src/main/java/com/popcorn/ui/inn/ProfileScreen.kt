@@ -1,8 +1,10 @@
 package com.popcorn.ui.inn
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,11 +30,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -44,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import coil.compose.AsyncImage
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
@@ -56,6 +62,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class Favorites (
+    val id: Int = 0,
+    val title: String = "",
+    val posterPath: String = ""
+)
 class ProfileScreen @Inject constructor(
     private val registerScreen: RegisterScreen,
 ) : Screen {
@@ -65,10 +76,27 @@ class ProfileScreen @Inject constructor(
         val sharedVM: MoviesViewModel = hiltViewModel()
         val nav = LocalNavigator.current
         val modifier: Modifier = Modifier
-        val favorites by remember { mutableStateOf<List<MovieItem>>(emptyList()) }
+
         val gridState = rememberLazyGridState()
         var selectedMovie by remember {
             mutableIntStateOf(-1) }
+        val db = Firebase.firestore
+        val user = Firebase.auth.currentUser
+        var favorites by remember { mutableStateOf<List<Favorites>>(emptyList()) }
+        LaunchedEffect(Unit) {
+            db.collection("users").document(user?.email.toString()).collection("favorites")
+                .get().addOnSuccessListener { documents ->
+                    val newFavorites = mutableListOf<Favorites>()
+                    for (doc in documents) {
+                        val id = doc.id.toInt()
+                        val title = doc.getString("title") ?: ""
+                        val posterPath = doc.getString("poster") ?: ""
+                        newFavorites.add(Favorites(id, title, posterPath))
+                    }
+                    favorites = newFavorites
+                }
+        }
+
         Scaffold(
             containerColor = colorResource(id = R.color.section),
             contentColor = colorResource(id = R.color.letter),
@@ -98,12 +126,14 @@ class ProfileScreen @Inject constructor(
                         }
                     }
                     Spacer(modifier = Modifier
-                        .fillMaxWidth(0.9f).height(1.dp)
+                        .fillMaxWidth(0.9f)
+                        .height(1.dp)
                         .background(
                             color = colorResource(
                                 id = R.color.section2
                             )
-                        ).align(Alignment.CenterHorizontally)
+                        )
+                        .align(Alignment.CenterHorizontally)
                     )
                     Text(text = "Hello ${Firebase.auth.currentUser?.displayName}", fontStyle = FontStyle.Italic, fontSize = 20.sp ,
                         modifier = Modifier.padding(start = 20.dp, bottom = 16.dp, top = 16.dp))
@@ -130,20 +160,15 @@ class ProfileScreen @Inject constructor(
                             tint = colorResource(id = R.color.high)
                         )
                     }
-                    CoroutineScope(Dispatchers.IO).launch {
-                        //Get favorite list
-                    }
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
+                        columns = GridCells.Adaptive(120.dp),
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(12.dp),
+                            .padding(8.dp),
                         state = gridState,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
                         content = {
                             itemsIndexed(favorites) { index, movie ->
-                                ClickOnMovie(movie, index, sharedVM) { i->
+                                ClickOnFavorite(index, movie, sharedVM) { i->
                                     selectedMovie = i
                                 }
                             }
@@ -152,5 +177,36 @@ class ProfileScreen @Inject constructor(
                 }
             }
         )
+    }
+    @Composable
+    fun ClickOnFavorite(index: Int, movieItem: Favorites, sharedVM: MoviesViewModel,onClick : (Int) -> Unit) {
+        val imgUrl = "https://image.tmdb.org/t/p/original"
+        val nav = LocalNavigator.current
+        val user = Firebase.auth.currentUser
+        Column(
+            Modifier
+                .clickable {
+                    onClick(index)
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val itsInFavorite = checkFavoriteMovie(user?.email.toString(), movieItem.id.toString())
+                        sharedVM.loadMovie(movieItem.id)
+                        nav?.push(DescriptionScreen(sharedVM, itsInFavorite))
+                    }
+                }
+                .padding(8.dp)
+        ) {
+            AsyncImage(
+                model = imgUrl+movieItem.posterPath,
+                contentDescription = null,
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(180.dp)
+            )
+            Text(text = movieItem.title,
+                Modifier
+                    .padding(top = 4.dp)
+                    .width(120.dp)
+            )
+        }
     }
 }
